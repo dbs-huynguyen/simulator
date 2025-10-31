@@ -2,20 +2,15 @@ const { chromium } = require("playwright");
 require('dotenv').config();
 
 if (!process.env.USERNAME) {
-  console.error('❌ Thiếu biến môi trường: USERNAME');
+  console.error('❌ Missing environment variable: USERNAME');
   process.exit(1);
 }
 if (!process.env.PASSWORD) {
-  console.error('❌ Thiếu biến môi trường: PASSWORD');
-  process.exit(1);
-}
-if (!process.env.SHUTDOWN_TEMPLATE_ID) {
-  console.error('❌ Thiếu biến môi trường: SHUTDOWN_TEMPLATE_ID');
+  console.error('❌ Missing environment variable: PASSWORD');
   process.exit(1);
 }
 console.log(process.env.USERNAME);
 console.log(process.env.PASSWORD);
-console.log(process.env.SHUTDOWN_TEMPLATE_ID);
 
 const folder = `logs/cms`;
 const today = new Date();
@@ -43,17 +38,17 @@ const dateString =
     await page.click("button#login-button");
     await page.waitForURL("https://awx.premedi.co.jp/#/home", { waitUntil: "networkidle" });
 
-    // Go to template shutdown CMS
-    await page.goto(`https://awx.premedi.co.jp/#/templates/job_template/${process.env.SHUTDOWN_TEMPLATE_ID}`, { waitUntil: "networkidle" });
-    await page.waitForURL(`https://awx.premedi.co.jp/#/templates/job_template/${process.env.SHUTDOWN_TEMPLATE_ID}*`, { waitUntil: "networkidle" });
-    await page.waitForTimeout(3000);
+    // Go to template shutdown CMS and launch
+    await page.goto(`https://awx.premedi.co.jp/#/templates/job_template/393`, { waitUntil: "networkidle" });
+    await page.waitForTimeout(5000);
 
     await page.getByRole("button", { name: "Launch" }).first().click();
+    await page.waitForURL(`https://awx.premedi.co.jp/#/jobs/playbook/*`, { waitUntil: "networkidle" });
     await page.waitForTimeout(15000);
 
+    // Refresh and take screenshot
     await page.reload({ waitUntil: "networkidle" });
-    await page.waitForTimeout(3000);
-
+    await page.waitForTimeout(5000);
     await page.screenshot({ path: `${folder}/${dateString}.png`, fullPage: true });
 
   } catch (error) {
